@@ -31,8 +31,13 @@ public class Main {
                     case 1 -> {
                         String longUrl = InputUtil.readString(scanner, "Enter long URL: ");
                         try {
-                            String shortCode = service.shortenUrl(longUrl);
-                            System.out.println("Short Code: " + shortCode);
+                            var result = service.shortenUrl(longUrl);
+                            if (result.isAlreadyExisted()) {
+                                System.out.println("Shortened URL already exists.");
+                            } else {
+                                System.out.println("URL shortened successfully.");
+                            }
+                            System.out.println("Short Code: " + result.getShortCode());
                         } catch (Exception e) {
                             System.out.println("Error: " + e.getMessage());
                         }

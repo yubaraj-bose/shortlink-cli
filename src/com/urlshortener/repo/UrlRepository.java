@@ -13,7 +13,7 @@ public class UrlRepository {
     public boolean shortCodeExists(String shortCode) {
         String sql = "SELECT 1 FROM urls WHERE short_code = ? LIMIT 1";
         try (Connection connection = Db.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, shortCode);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -26,7 +26,7 @@ public class UrlRepository {
     public void save(String shortCode, String longUrl) {
         String sql = "INSERT INTO urls (short_code, long_url) VALUES (?, ?)";
         try (Connection connection = Db.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, shortCode);
             ps.setString(2, longUrl);
             ps.executeUpdate();
@@ -43,7 +43,7 @@ public class UrlRepository {
                 """;
 
         try (Connection connection = Db.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, shortCode);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -52,8 +52,7 @@ public class UrlRepository {
                             rs.getString("short_code"),
                             rs.getString("long_url"),
                             rs.getInt("clicks"),
-                            rs.getTimestamp("created_at").toLocalDateTime()
-                    );
+                            rs.getTimestamp("created_at").toLocalDateTime());
                 }
                 return null;
             }
@@ -65,7 +64,7 @@ public class UrlRepository {
     public void incrementClicks(String shortCode) {
         String sql = "UPDATE urls SET clicks = clicks + 1 WHERE short_code = ?";
         try (Connection connection = Db.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, shortCode);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -81,8 +80,8 @@ public class UrlRepository {
                 """;
 
         try (Connection connection = Db.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             boolean found = false;
             while (rs.next()) {
@@ -100,6 +99,32 @@ public class UrlRepository {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to list mappings", e);
+        }
+    }
+
+    public UrlMapping findByLongUrl(String longUrl) {
+        String sql = """
+                SELECT id, short_code, long_url, clicks, created_at
+                FROM urls
+                WHERE long_url = ?
+                """;
+
+        try (Connection connection = Db.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, longUrl);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new UrlMapping(
+                            rs.getInt("id"),
+                            rs.getString("short_code"),
+                            rs.getString("long_url"),
+                            rs.getInt("clicks"),
+                            rs.getTimestamp("created_at").toLocalDateTime());
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch URL by long URL", e);
         }
     }
 }

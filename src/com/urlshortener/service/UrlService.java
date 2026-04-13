@@ -1,5 +1,6 @@
 package com.urlshortener.service;
 
+import com.urlshortener.model.ShortenResult;
 import com.urlshortener.model.UrlMapping;
 import com.urlshortener.repo.UrlRepository;
 
@@ -12,9 +13,15 @@ public class UrlService {
         this.generator = generator;
     }
 
-    public String shortenUrl(String longUrl) {
+    public ShortenResult shortenUrl(String longUrl) {
         if (longUrl == null || longUrl.isBlank()) {
             throw new IllegalArgumentException("URL cannot be empty");
+        }
+
+        UrlMapping existing = repository.findByLongUrl(longUrl);
+        if (existing != null) {
+            repository.incrementClicks(existing.getShortCode());
+            return new ShortenResult(existing.getShortCode(), true);
         }
 
         String shortCode;
@@ -29,7 +36,7 @@ public class UrlService {
         } while (repository.shortCodeExists(shortCode));
 
         repository.save(shortCode, longUrl);
-        return shortCode;
+        return new ShortenResult(shortCode, false);
     }
 
     public String getLongUrl(String shortCode) {

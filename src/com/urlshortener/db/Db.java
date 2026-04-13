@@ -1,4 +1,5 @@
 package com.urlshortener.db;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -41,17 +42,17 @@ public class Db {
 
     public static void initializeDatabase() {
         String sql = """
-                CREATE TABLE IF NOT EXISTS urls (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    short_code VARCHAR(20) NOT NULL UNIQUE,
-                    long_url TEXT NOT NULL,
-                    clicks INT NOT NULL DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
+                    CREATE TABLE IF NOT EXISTS urls (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        short_code VARCHAR(20) NOT NULL UNIQUE,
+                        long_url TEXT NOT NULL,
+                        clicks INT NOT NULL DEFAULT 0,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
                 """;
 
         try (Connection connection = getConnection();
-             Statement statement = connection.createStatement()) {
+                Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database", e);

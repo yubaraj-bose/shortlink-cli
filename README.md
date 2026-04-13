@@ -92,14 +92,22 @@ docker-compose up -d
 
 ```bash
 # Compile
+rm -rf out   ##use this only when previous buggy classes exist in out folder.
+mkdir -p out
 javac -cp "lib/mysql-connector-j-9.6.0.jar" -d out $(find src -name "*.java")
 
 # Run
 java -cp "out:lib/mysql-connector-j-9.6.0.jar" com.urlshortener.Main
 ```
 
-> On Windows, replace `:` with `;` in the classpath separator.
-
+### 6. If you want to view the mysql table within docker 
+```bash
+docker exec -it url-shortener-mysql mysql -u root -p
+password:-root
+use urldb;
+select * from urls;
+exit;
+```
 ---
 
 ## 💡 Usage
@@ -107,10 +115,12 @@ java -cp "out:lib/mysql-connector-j-9.6.0.jar" com.urlshortener.Main
 Once running, the CLI will present a menu:
 
 ```
-1. Shorten a URL
-2. Retrieve original URL
-3. View all mappings
+===== URL SHORTENER =====
+1. Shorten URL
+2. Retrieve Long URL
+3. Show All URLs
 4. Exit
+Enter choice:
 ```
 
 ---
@@ -122,7 +132,7 @@ CREATE TABLE url_mappings (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     short_code  VARCHAR(10) NOT NULL UNIQUE,
     long_url    TEXT NOT NULL,
-    click_count INT DEFAULT 0,
+    clicks      INT DEFAULT 0,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
