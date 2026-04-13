@@ -106,7 +106,7 @@ docker-compose up -d
 
 ```bash
 # Compile
-rm -rf out   ##use this only when previous buggy classes exist in out folder.
+rm -rf out   ##use this only when previous buggy classes exist in "out" folder.
 mkdir -p out
 javac -cp "lib/mysql-connector-j-9.6.0.jar" -d out $(find src -name "*.java")
 
