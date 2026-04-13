@@ -26,9 +26,11 @@ This project allows users to store long URLs and retrieve them using short codes
 ---
 
 ## 📁 Project Structure
+
+```
 shortlink-cli/
 ├── lib/
-│   └── mysql-connector-j-8.4.0.jar
+│   └── mysql-connector-j-9.6.0.jar
 ├── config/
 │   └── db.properties
 ├── src/
@@ -47,16 +49,86 @@ shortlink-cli/
 │           └── util/
 │               └── InputUtil.java
 └── docker-compose.yml
-
+```
 
 ---
 
 ## ⚙️ Setup Instructions
 
-
 ### 1. Clone the repository
+
+```bash
 git clone <your-repo-url>
 cd shortlink-cli
+```
 
-# Add Mysql JDBC Driver
+### 2. Add MySQL JDBC Driver
+
+Download the MySQL Connector/J JAR and place it at:
+
+```
 shortlink-cli/lib/mysql-connector-j-9.6.0.jar
+```
+
+> You can download it from the [official MySQL downloads page](https://dev.mysql.com/downloads/connector/j/).
+
+### 3. Configure the Database
+
+Edit `config/db.properties` with your database connection details:
+
+```properties
+db.url=jdbc:mysql://localhost:3306/shortlink
+db.username=root
+db.password=yourpassword
+```
+
+### 4. Start MySQL with Docker
+
+```bash
+docker-compose up -d
+```
+
+### 5. Compile and Run
+
+```bash
+# Compile
+javac -cp "lib/mysql-connector-j-9.6.0.jar" -d out $(find src -name "*.java")
+
+# Run
+java -cp "out:lib/mysql-connector-j-9.6.0.jar" com.urlshortener.Main
+```
+
+> On Windows, replace `:` with `;` in the classpath separator.
+
+---
+
+## 💡 Usage
+
+Once running, the CLI will present a menu:
+
+```
+1. Shorten a URL
+2. Retrieve original URL
+3. View all mappings
+4. Exit
+```
+
+---
+
+## 🗄️ Database Schema
+
+```sql
+CREATE TABLE url_mappings (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    short_code  VARCHAR(10) NOT NULL UNIQUE,
+    long_url    TEXT NOT NULL,
+    click_count INT DEFAULT 0,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).
