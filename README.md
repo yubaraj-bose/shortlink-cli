@@ -31,24 +31,36 @@ This project allows users to store long URLs and retrieve them using short codes
 shortlink-cli/
 ├── lib/
 │   └── mysql-connector-j-9.6.0.jar
+│
 ├── config/
 │   └── db.properties
+│
 ├── src/
 │   └── com/
 │       └── urlshortener/
 │           ├── Main.java
+│           │
 │           ├── db/
 │           │   └── Db.java
+│           │
 │           ├── model/
-│           │   └── UrlMapping.java
+│           │   ├── UrlMapping.java
+│           │   └── ShortenResult.java       
+│           │
 │           ├── repo/
 │           │   └── UrlRepository.java
+│           │
 │           ├── service/
 │           │   ├── ShortCodeGenerator.java
 │           │   └── UrlService.java
+│           │
 │           └── util/
 │               └── InputUtil.java
-└── docker-compose.yml
+│
+│  
+│
+├── docker-compose.yml
+└── README.md
 ```
 
 ---
@@ -88,7 +100,9 @@ db.password=yourpassword
 docker-compose up -d
 ```
 
-### 5. Compile and Run
+### 5. Make sure Docker Desktop is up and Running
+
+### 6. Compile and Run
 
 ```bash
 # Compile
@@ -100,7 +114,7 @@ javac -cp "lib/mysql-connector-j-9.6.0.jar" -d out $(find src -name "*.java")
 java -cp "out:lib/mysql-connector-j-9.6.0.jar" com.urlshortener.Main
 ```
 
-### 6. If you want to view the mysql table within docker 
+### 7. If you want to view the mysql table within docker 
 ```bash
 docker exec -it url-shortener-mysql mysql -u root -p
 password:-root
@@ -128,13 +142,13 @@ Enter choice:
 ## 🗄️ Database Schema
 
 ```sql
-CREATE TABLE url_mappings (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    short_code  VARCHAR(10) NOT NULL UNIQUE,
-    long_url    TEXT NOT NULL,
-    clicks      INT DEFAULT 0,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+  CREATE TABLE IF NOT EXISTS urls (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    short_code VARCHAR(20) NOT NULL UNIQUE,
+    long_url TEXT NOT NULL,
+    clicks INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 ```
 
 ---
