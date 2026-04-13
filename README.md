@@ -1,31 +1,18 @@
-# Link Mapper CLI
+# Shortlink CLI
 
-A command-line based link mapping system built using Java, JDBC, and MySQL.  
-This project allows users to store long URLs and retrieve them using short codes.
-
----
-
-## 🚀 Features
-
-- Generate short codes for long URLs
-- Retrieve original URL using short code
-- Track number of accesses (click count)
-- View all stored mappings
-- Fully CLI-based (no frontend)
-- MySQL database running via Docker
+A command-line URL shortener built with Java, JDBC, and MySQL. Generates short codes for long URLs and supports real browser redirection via a lightweight HTTP server.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- Java (CLI application)
-- JDBC (Database connectivity)
-- MySQL (Database)
-- Docker (Database containerization)
+- Java (CLI + HTTP server)
+- JDBC
+- MySQL via Docker
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 shortlink-cli/
@@ -39,13 +26,14 @@ shortlink-cli/
 │   └── com/
 │       └── urlshortener/
 │           ├── Main.java
+│           ├── ServerMain.java
 │           │
 │           ├── db/
 │           │   └── Db.java
 │           │
 │           ├── model/
 │           │   ├── UrlMapping.java
-│           │   └── ShortenResult.java       
+│           │   └── ShortenResult.java
 │           │
 │           ├── repo/
 │           │   └── UrlRepository.java
@@ -54,10 +42,11 @@ shortlink-cli/
 │           │   ├── ShortCodeGenerator.java
 │           │   └── UrlService.java
 │           │
+│           ├── server/
+│           │   └── RedirectServer.java
+│           │
 │           └── util/
 │               └── InputUtil.java
-│
-│  
 │
 ├── docker-compose.yml
 └── README.md
@@ -65,7 +54,7 @@ shortlink-cli/
 
 ---
 
-## ⚙️ Setup Instructions
+## Setup
 
 ### 1. Clone the repository
 
@@ -76,83 +65,112 @@ cd shortlink-cli
 
 ### 2. Add MySQL JDBC Driver
 
-Download the MySQL Connector/J JAR and place it at:
+Place the driver at:
 
 ```
-shortlink-cli/lib/mysql-connector-j-9.6.0.jar
+lib/mysql-connector-j-9.6.0.jar
 ```
 
-> You can download it from the [official MySQL downloads page](https://dev.mysql.com/downloads/connector/j/).
+### 3. Configure the database
 
-### 3. Configure the Database
-
-Edit `config/db.properties` with your database connection details:
+Edit `config/db.properties`:
 
 ```properties
-db.url=jdbc:mysql://localhost:3306/shortlink
-db.username=root
-db.password=yourpassword
+db.url=jdbc:mysql://localhost:3307/urldb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+db.user=root
+db.password=root
 ```
 
-### 4. Start MySQL with Docker
+### 4. Make sure Docker Desktop is running
+
+### 5. Start MySQL
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-### 5. Make sure Docker Desktop is up and Running
-
-### 6. Compile and Run
+### 6. Compile
 
 ```bash
-# Compile
-rm -rf out   ##use this only when previous buggy classes exist in "out" folder.
-mkdir -p out
+rm -rf out && mkdir -p out
 javac -cp "lib/mysql-connector-j-9.6.0.jar" -d out $(find src -name "*.java")
+```
 
-# Run
+---
+
+## Running the Application
+
+You need **two terminals** running simultaneously.
+
+**Terminal 1 — HTTP Server:**
+
+```bash
+java -cp "out:lib/mysql-connector-j-9.6.0.jar" com.urlshortener.ServerMain
+```
+
+Keep this terminal open. The server runs at `http://localhost:8080`.
+
+**Terminal 2 — CLI:**
+
+```bash
 java -cp "out:lib/mysql-connector-j-9.6.0.jar" com.urlshortener.Main
 ```
 
-### 7. If you want to view the mysql table within docker 
-```bash
-docker exec -it url-shortener-mysql mysql -u root -p
-password:-root
-use urldb;
-select * from urls;
-exit;
-```
 ---
 
-## 💡 Usage
+## Usage
 
-Once running, the CLI will present a menu:
+1. In the CLI, select option `1` and enter a long URL:
 
-```
-===== URL SHORTENER =====
-1. Shorten URL
-2. Retrieve Long URL
-3. Show All URLs
-4. Exit
-Enter choice:
-```
+   ```
+  Example:- https://www.google.com
+   ```
+
+2. You'll receive a short code and browser URL:
+
+   ```
+   Example:-
+   Short Code: E9t4SE
+   Browser URL: http://localhost:8080/E9t4SE
+   ```
+
+3. Open the URL in a browser — it redirects to the original URL.
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
 ```sql
-  CREATE TABLE IF NOT EXISTS urls (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    short_code VARCHAR(20) NOT NULL UNIQUE,
-    long_url TEXT NOT NULL,
-    clicks INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+CREATE TABLE IF NOT EXISTS urls (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    short_code VARCHAR(20)  NOT NULL UNIQUE,
+    long_url   TEXT         NOT NULL,
+    clicks     INT          NOT NULL DEFAULT 0,
+    created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+To inspect stored mappings:
+
+```bash
+docker exec -it url-shortener-mysql mysql -u root -p
+# password: root
+```
+
+```sql
+USE urldb;
+SELECT * FROM urls;
 ```
 
 ---
 
-## 📄 License
+## Notes
 
-This project is open-source and available under the [MIT License](LICENSE).
+- Start Docker before running the application.
+- Keep the HTTP server (Terminal 1) running while testing in the browser.
+
+---
+
+## License
+
+MIT

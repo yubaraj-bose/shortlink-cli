@@ -38,6 +38,7 @@ public class Main {
                                 System.out.println("URL shortened successfully.");
                             }
                             System.out.println("Short Code: " + result.getShortCode());
+                            System.out.println("Browser URL: http://localhost:8080/" + result.getShortCode());
                         } catch (Exception e) {
                             System.out.println("Error: " + e.getMessage());
                         }
